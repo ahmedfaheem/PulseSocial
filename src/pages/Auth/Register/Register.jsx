@@ -1,12 +1,13 @@
 import React from "react";
 // Removed Select and ListBox since you are using native HTML select now
-import { Button, Input, Label } from "@heroui/react";
-import { useForm } from "react-hook-form";
-
+import { Button, Input, Label, Select,ListBox  } from "@heroui/react";
+import { Controller, useForm } from "react-hook-form";
+import ValidationMessage from "../../../components/Shared/ValidationMessage/ValidationMessage";
 export default function Register() {
   const {
     register,
     handleSubmit,
+    control,
     watch,
     formState: { errors, touchedFields },
   } = useForm({
@@ -63,8 +64,8 @@ export default function Register() {
                   }
                 })}
               />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name?.message}</p>}
-            </div>
+              <ValidationMessage field={errors.name} />
+             </div>
 
             {/* Username */}
             <div>
@@ -89,7 +90,7 @@ export default function Register() {
                   },
                 })}
               />
-              {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username?.message}</p>}
+              <ValidationMessage field={errors.username} />
             </div>
 
             {/* Email */}
@@ -112,7 +113,7 @@ export default function Register() {
                   }
                 })}
               />
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email?.message}</p>}
+              <ValidationMessage field={errors.email} />
             </div>
 
             {/* Date of Birth */}
@@ -137,34 +138,50 @@ export default function Register() {
                   }
                 })}
               />
-              {errors.dateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth?.message}</p>}
+              <ValidationMessage field={errors.dateOfBirth} />
             </div>
 
             {/* Gender Selection */}
+       
             <div>
-              <Label htmlFor="gender" className="text-sm font-medium text-gray-700 block mb-1.5">
-                Gender
-              </Label>
-              <select
-                id="gender"
-                {...register('gender', {
-                  required: {
-                    value: true,
-                    message: "Gender is required",
-                  },
-                })}
-                defaultValue=""
-                className="w-full border-2 rounded-xl px-3 py-2 bg-white text-gray-700 border-gray-200 hover:border-gray-300 transition focus:outline-none focus:border-gray-400 focus:ring-0 cursor-pointer"
-              >
-                <option value="" disabled hidden>
-                  Select Gender
-                </option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-              {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender?.message}</p>}
-            </div>
+         <Controller 
+          control={control}
+          name="gender"
+          rules={{
+            required:{
+              value:true,
+              message:"Gender is Required"
+            }
+          }}
+          render={({field})=>
+              <Select placeholder="Select Gender" {...field}>
+                <Label>Gender</Label>
 
+                <Select.Trigger>
+                  <Select.Value />
+                  <Select.Indicator />
+                </Select.Trigger>
+
+                <Select.Popover>
+                  <ListBox>
+                    <ListBox.Item id="male" textValue="Male">
+                      Male
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+
+                    <ListBox.Item id="female" textValue="Female">
+                      Female
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  </ListBox>
+                </Select.Popover>
+              </Select>
+            }
+         />
+          <ValidationMessage field={errors.gender} />
+</div>
+         
+            
             {/* Password */}
             <div>
               <Label htmlFor="password" className="text-sm font-medium text-gray-700 block mb-1.5">Password</Label>
@@ -186,7 +203,7 @@ export default function Register() {
                 })}
               />
               {/* FIXED: Moved error inside the password div */}
-              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password?.message}</p>}
+              <ValidationMessage field={errors.password} />
             </div>
 
             {/* Confirm Password */}
@@ -207,7 +224,7 @@ export default function Register() {
                 })}
               />
               {/* FIXED: Moved error inside the confirm password div */}
-              {errors.rePassword && <p className="text-red-500 text-sm mt-1">{errors.rePassword?.message}</p>}
+              <ValidationMessage field={errors.rePassword} />
             </div>
 
           </div>
