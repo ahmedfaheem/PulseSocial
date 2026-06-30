@@ -3,7 +3,38 @@ import React from "react";
 import { Button, Input, Label, Select,ListBox  } from "@heroui/react";
 import { Controller, useForm } from "react-hook-form";
 import ValidationMessage from "../../../components/Shared/ValidationMessage/ValidationMessage";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod"; 
+
 export default function Register() {
+
+
+const schema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  username: z.string().min(3, "Username must be at least 3 characters").max(20, "Username must be at most 20 characters"),
+  email: z.string().email("Invalid email address"),
+  dateOfBirth: z.date()
+  .refine(
+    (date) =>{  return new Date().getFullYear() - date.getFullYear() >= 13},
+    "You must be at least 13 years old"
+  )
+  .transform(
+    (date) =>
+      `${date.getMonth() +1}-${date.getDate()}-${date.getFullYear()}`
+  ),
+  gender: z.enum(["male", "female"], "Gender is required"),
+  password: z.string().min(8, "Password must be at least 8 characters").regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/, "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character"),
+  rePassword: z.string(),
+  })
+  .refine((data) => data.password === data.rePassword, {
+     message: "Passwords do not match",
+     path: ["rePassword"], //must determine which field the error should be associated with
+  });
+
+
+
+
+
   const {
     register,
     handleSubmit,
@@ -15,9 +46,12 @@ export default function Register() {
       name: "",
       username: "",
       email: "",
-      dateOfBirth: "",
+      dateOfBirth: new Date(),
+      password: "",
+      rePassword: "",
     },
     mode: "onBlur", // Validate on blur
+    resolver:  zodResolver(schema),
   });
 
   function onSubmit(data) {
@@ -53,16 +87,18 @@ export default function Register() {
                 placeholder="John Doe"  
                 variant="bordered" 
                 className="w-full"
-                {...register('name', {
-                  required: {
-                    value: true,
-                    message: "Name is required"
-                  },
-                  minLength: {
-                    value: 3,
-                    message: "Name must be at least 3 characters"
-                  }
-                })}
+                {...register('name'
+                //   , {
+                //   required: {
+                //     value: true,
+                //     message: "Name is required"
+                //   },
+                //   minLength: {
+                //     value: 3,
+                //     message: "Name must be at least 3 characters"
+                //   }
+                // }
+              )}
               />
               <ValidationMessage field={errors.name} />
              </div>
@@ -75,20 +111,22 @@ export default function Register() {
                 placeholder="@username"  
                 variant="bordered" 
                 className="w-full"
-                {...register('username', {
-                  required: {
-                    value: true,
-                    message: "Username is required",
-                  },
-                  minLength: {
-                    value: 3,
-                    message: "Username must be at least 3 characters",
-                  },
-                  maxLength: { 
-                    value: 20,
-                    message: "Username must be at most 20 characters",
-                  },
-                })}
+                {...register('username'
+                //   , {
+                //   required: {
+                //     value: true,
+                //     message: "Username is required",
+                //   },
+                //   minLength: {
+                //     value: 3,
+                //     message: "Username must be at least 3 characters",
+                //   },
+                //   maxLength: { 
+                //     value: 20,
+                //     message: "Username must be at most 20 characters",
+                //   },
+                // }
+              )}
               />
               <ValidationMessage field={errors.username} />
             </div>
@@ -102,16 +140,18 @@ export default function Register() {
                 placeholder="example@email.com"
                 variant="bordered"
                 className="w-full"
-                {...register('email', {
-                  required: {
-                    value: true,
-                    message: "Email is required"
-                  },
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address"
-                  }
-                })}
+                {...register('email'
+                //   , {
+                //   required: {
+                //     value: true,
+                //     message: "Email is required"
+                //   },
+                //   pattern: {
+                //     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                //     message: "Invalid email address"
+                //   }
+                // }
+              )}
               />
               <ValidationMessage field={errors.email} />
             </div>
@@ -124,19 +164,21 @@ export default function Register() {
                 type="date"  
                 variant="bordered" 
                 className="w-full" 
-                {...register('dateOfBirth', {
-                  required: {
-                    value: true,
-                    message: "Date of Birth is required"
-                  },
-                  valueAsDate: true,
-                  validate: (value) => {
-                    if(new Date().getFullYear() - new Date(value).getFullYear() < 13){
-                      return "You must be at least 13 years old";
-                    }
-                    return true;
-                  }
-                })}
+                {...register('dateOfBirth',{valueAsDate: true}
+                //   , {
+                //   required: {
+                //     value: true,
+                //     message: "Date of Birth is required"
+                //   },
+                //   valueAsDate: true,
+                //   validate: (value) => {
+                //     if(new Date().getFullYear() - new Date(value).getFullYear() < 13){
+                //       return "You must be at least 13 years old";
+                //     }
+                //     return true;
+                //   }
+                // }
+              )}
               />
               <ValidationMessage field={errors.dateOfBirth} />
             </div>
@@ -147,12 +189,12 @@ export default function Register() {
          <Controller 
           control={control}
           name="gender"
-          rules={{
-            required:{
-              value:true,
-              message:"Gender is Required"
-            }
-          }}
+          // rules={{
+          //   required:{
+          //     value:true,
+          //     message:"Gender is Required"
+          //   }
+          // }}
           render={({field})=>
               <Select placeholder="Select Gender" {...field}>
                 <Label>Gender</Label>
@@ -191,16 +233,18 @@ export default function Register() {
                 placeholder="********"
                 variant="bordered"
                 className="w-full"
-                {...register('password', {
-                  required: {
-                    value: true,
-                    message: "Password is required",
-                  },
-                  minLength: {
-                    value: 8,
-                    message: "Password must be at least 8 characters",
-                  },
-                })}
+                {...register('password'
+                //   , {
+                //   required: {
+                //     value: true,
+                //     message: "Password is required",
+                //   },
+                //   minLength: {
+                //     value: 8,
+                //     message: "Password must be at least 8 characters",
+                //   },
+                // }
+              )}
               />
               {/* FIXED: Moved error inside the password div */}
               <ValidationMessage field={errors.password} />
@@ -215,13 +259,15 @@ export default function Register() {
                 placeholder="********"
                 variant="bordered"
                 className="w-full"
-                {...register('rePassword', {
-                  required: {
-                    value: true,
-                    message: "Please confirm your password",
-                  },
-                  validate: (value) => value === watch('password') || "Passwords do not match",
-                })}
+                {...register('rePassword'
+                //   , {
+                //   required: {
+                //     value: true,
+                //     message: "Please confirm your password",
+                //   },
+                //   validate: (value) => value === watch('password') || "Passwords do not match",
+                // }
+              )}
               />
               {/* FIXED: Moved error inside the confirm password div */}
               <ValidationMessage field={errors.rePassword} />
