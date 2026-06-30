@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import ValidationMessage from "../../../components/Shared/ValidationMessage/ValidationMessage";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod"; 
-
+import axios from "axios";
 export default function Register() {
 
 
@@ -54,7 +54,20 @@ const schema = z.object({
     resolver:  zodResolver(schema),
   });
 
-  function onSubmit(data) {
+  async function onSubmit(data) {
+    
+    try{
+      const res = await axios.post("https://route-posts.routemisr.com/users/signup", data);
+
+      if(res.status === 201) {
+        console.log("User registered successfully");
+      }else if( res.error){
+        throw new Error(res.error);
+      }
+    }catch(err){
+      console.log(err.response.data.message);
+    }
+    
     console.log(data);
   }
 
