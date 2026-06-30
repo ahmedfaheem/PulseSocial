@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 // Removed Select and ListBox since you are using native HTML select now
-import { Button, Input, Label, Select,ListBox  } from "@heroui/react";
+import { Button, Input, Label, Select,ListBox, Spinner, Alert  } from "@heroui/react";
 import { Controller, useForm } from "react-hook-form";
 import ValidationMessage from "../../../components/Shared/ValidationMessage/ValidationMessage";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod"; 
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 export default function Register() {
 
 
@@ -32,7 +33,8 @@ const schema = z.object({
   });
 
 
-
+  const [ApiError, setApiError] = useState(null);
+  const [SuccessMessage, setSuccessMessage] = useState(null);
 
 
   const {
@@ -40,7 +42,7 @@ const schema = z.object({
     handleSubmit,
     control,
     watch,
-    formState: { errors, touchedFields },
+    formState: { errors, touchedFields, isSubmitting, isValid },
   } = useForm({
     defaultValues: {
       name: "",
@@ -54,21 +56,31 @@ const schema = z.object({
     resolver:  zodResolver(schema),
   });
 
+  const navigate = useNavigate();
+
   async function onSubmit(data) {
     
     try{
       const res = await axios.post("https://route-posts.routemisr.com/users/signup", data);
 
       if(res.status === 201) {
-        console.log("User registered successfully");
-      }else if( res.error){
+        setApiError('');
+        setSuccessMessage("Registration Successfull!")
+        setTimeout(() => {
+
+          navigate("/auth/login");
+
+        }, 1000);
+        
+      }else{
         throw new Error(res.error);
       }
+
     }catch(err){
-      console.log(err.response.data.message);
+      setApiError(err.response.data.message);
     }
     
-    console.log(data);
+    // console.log(data);
   }
 
   return (
@@ -290,11 +302,58 @@ const schema = z.object({
 
           {/* Submit Button */}
           <div className="flex justify-center pt-4">
-            <Button type="submit" color="primary" className="w-full md:w-1/2 h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition">
-              Create Account
-            </Button>
+          
+
+             <Button isPending={isSubmitting} isDisabled={!isValid} type="submit" color="primary" className="w-full md:w-1/2 h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition">
+              {({isPending}) => (
+                <>
+                  {isPending ? <Spinner color="current" size="sm" />  : "Create Account"}
+                  {isPending && "Progress..."}
+                </>
+              )}
+             </Button>
           </div>
         </form>
+
+       {ApiError && 
+    <Alert
+  status="danger"
+  className="mt-4 rounded-2xl border border-danger/30 bg-white shadow-lg"
+>
+  <Alert.Indicator className="text-danger" />
+
+  <Alert.Content>
+    <Alert.Title className="text-danger font-semibold">
+      Something went wrong
+    </Alert.Title>
+
+    <Alert.Description className="text-gray-600">
+      {ApiError}
+    </Alert.Description>
+  </Alert.Content>
+</Alert>
+
+      }
+
+      { SuccessMessage &&
+      <Alert
+  status="success"
+  className="mt-4 rounded-2xl border border-success/30 bg-white shadow-lg"
+>
+  <Alert.Indicator className="text-success" />
+
+  <Alert.Content>
+    <Alert.Title className="font-semibold text-success">
+      Registration Successful
+    </Alert.Title>
+
+    <Alert.Description className="text-gray-600">
+      Your account has been created successfully. Redirecting to the login page...
+    </Alert.Description>
+  </Alert.Content>
+</Alert>
+
+      }
 
         {/* Divider */}
         <div className="my-6 flex items-center">
@@ -306,9 +365,9 @@ const schema = z.object({
         {/* Navigation Footer */}
         <p className="text-center text-gray-500 text-sm">
           Already have an account?{" "}
-          <a href="/login" className="font-semibold text-blue-600 hover:underline transition">
+          <Link to={"/auth/login"} className="font-semibold text-blue-600 hover:underline transition">
             Login
-          </a>
+          </Link>
         </p>
       </div>
     </div>
