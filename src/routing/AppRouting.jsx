@@ -5,6 +5,8 @@ import Register from "../pages/Auth/Register/Register";
 import UserLayout from "../layouts/Auth/UserLayout/UserLayout";
 import Home from "../pages/Home/Home";
 import Profile from "../pages/Profile/Profile";
+import ProtectedRoute from "./ProtectedRoute";
+import ProtectedAuthRoute from "./ProtectedAuthRoute";
 export const routes = createBrowserRouter([
   {
     path: "",
@@ -12,11 +14,11 @@ export const routes = createBrowserRouter([
     children: [
       {
         path: "login",
-        element: <Login />,
+        element:<ProtectedAuthRoute> <Login /> </ProtectedAuthRoute>,
       },
       {
         path: "register",
-        element: <Register />,
+        element: <ProtectedAuthRoute> <Register /> </ProtectedAuthRoute>,
       },
     ],
   },
@@ -26,11 +28,11 @@ export const routes = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Home />,
+        element: <ProtectedRoute> <Home /> </ProtectedRoute>,
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: <ProtectedRoute> <Profile />  </ProtectedRoute>,
       },
     ],
   },

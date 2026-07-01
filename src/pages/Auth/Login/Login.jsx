@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Button,
   Input,
@@ -15,13 +15,15 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import AppButton from "../../../components/Shared/AppButton/AppButton";
 import { loginSchema } from "../../../schemas/LOGIN.schema";
-
+import {AuthContext} from  "../../../context/AuthContext"
 
 export default function Login() {
  
   const [ApiError, setApiError] = useState(null);
   const [SuccessMessage, setSuccessMessage] = useState(null);
   const navigate = useNavigate();
+
+  const {token, storeToken, clearToken} = useContext(AuthContext)
 
   const {
     register,
@@ -51,6 +53,8 @@ export default function Login() {
       if (res.status === 200) {
         setApiError("");
         setSuccessMessage("Login Successfull!");
+        storeToken(res.data.data.token)
+        console.log(res.data.data.token);
         setTimeout(() => {
           navigate("/");
         }, 1000);
